@@ -19,5 +19,5 @@
   "license": "MIT",
   "frameworks": "*",
   "platforms": "*",
-  "headers": "HX711.h"
+  "headers": "HX71708.h"
 }

@@ -1,33 +1,36 @@
 //
-//    FILE: HX711.cpp
+//    FILE: HX71708.cpp
 //  AUTHOR: Rob Tillaart
 // VERSION: 0.5.2
 // PURPOSE: Library for load cells for UNO
 //     URL: https://github.com/RobTillaart/HX711_MP
 //     URL: https://github.com/RobTillaart/HX711
 
+// forked by Ben Iseman
+// support for HX71708
 
-#include "HX711.h"
+
+#include "HX71708.h"
 
 
-HX711::HX711()
+HX71708::HX71708()
 {
-  _gain     = HX711_CHANNEL_A_GAIN_128;
+  _data_rate     = HX71708_DATA_RATE_320;
   _offset   = 0;
   _scale    = 1;
   _lastTimeRead = 0;
   _price    = 0;
-  _mode     = HX711_AVERAGE_MODE;
+  _mode     = HX71708_AVERAGE_MODE;
   _fastProcessor = false;
 }
 
 
-HX711::~HX711()
+HX71708::~HX71708()
 {
 }
 
 
-void HX711::begin(uint8_t dataPin, uint8_t clockPin, bool fastProcessor )
+void HX71708::begin(uint8_t dataPin, uint8_t clockPin, bool fastProcessor )
 {
   _dataPin  = dataPin;
   _clockPin = clockPin;
@@ -41,26 +44,26 @@ void HX711::begin(uint8_t dataPin, uint8_t clockPin, bool fastProcessor )
 }
 
 
-void HX711::reset()
+void HX71708::reset()
 {
   power_down();
   power_up();
-  _gain     = HX711_CHANNEL_A_GAIN_128;
+  _data_rate     = HX71708_DATA_RATE_320;
   _offset   = 0;
   _scale    = 1;
   _lastTimeRead = 0;
   _price    = 0;
-  _mode     = HX711_AVERAGE_MODE;
+  _mode     = HX71708_AVERAGE_MODE;
 }
 
 
-bool HX711::is_ready()
+bool HX71708::is_ready()
 {
   return digitalRead(_dataPin) == LOW;
 }
 
 
-void HX711::wait_ready(uint32_t ms)
+void HX71708::wait_ready(uint32_t ms)
 {
   while (!is_ready())
   {
@@ -69,7 +72,7 @@ void HX711::wait_ready(uint32_t ms)
 }
 
 
-bool HX711::wait_ready_retry(uint8_t retries, uint32_t ms)
+bool HX71708::wait_ready_retry(uint8_t retries, uint32_t ms)
 {
   while (retries--)
   {
@@ -80,7 +83,7 @@ bool HX711::wait_ready_retry(uint8_t retries, uint32_t ms)
 }
 
 
-bool HX711::wait_ready_timeout(uint32_t timeout, uint32_t ms)
+bool HX71708::wait_ready_timeout(uint32_t timeout, uint32_t ms)
 {
   uint32_t start = millis();
   while (millis() - start < timeout)
@@ -101,7 +104,7 @@ bool HX711::wait_ready_timeout(uint32_t timeout, uint32_t ms)
 //       digital output pin DOUT is HIGH.
 //  Serial clock input PD_SCK should be LOW.
 //  When DOUT goes to LOW, it indicates data is ready for retrieval.
-float HX711::read()
+float HX71708::read()
 {
   //  this BLOCKING wait takes most time...
   while (digitalRead(_dataPin) == HIGH) yield();
@@ -123,21 +126,22 @@ float HX711::read()
   v.data[1] = _shiftIn();
   v.data[0] = _shiftIn();
 
-  //  TABLE 3 page 4 datasheet
+  
   //
-  //  CLOCK      CHANNEL      GAIN      m
+  //  CLOCK      DATA RATE      m
   //  ------------------------------------
-  //   25           A         128       1    //  default
-  //   26           B          32       2
-  //   27           A          64       3
+  //   25           10       1   
+  //   26           20       2
+  //   27           80       3  //
+  //   28           320      4  //default
   //
-  //  only default 128 verified,
-  //  selection goes through the set_gain(gain)
+   
   //
-  uint8_t m = 1;
-  if      (_gain == HX711_CHANNEL_A_GAIN_128) m = 1;
-  else if (_gain == HX711_CHANNEL_A_GAIN_64)  m = 3;
-  else if (_gain == HX711_CHANNEL_B_GAIN_32)  m = 2;
+  uint8_t m = 4;
+  if      (_data_rate == HX71708_DATA_RATE_10) m = 1;
+  else if  (_data_rate == HX71708_DATA_RATE_20) m = 2;
+  else if  (_data_rate == HX71708_DATA_RATE_80) m = 3;
+  else if  (_data_rate == HX71708_DATA_RATE_320) m = 4;
 
   while (m > 0)
   {
@@ -162,7 +166,7 @@ float HX711::read()
 }
 
 
-float HX711::read_average(uint8_t times)
+float HX71708::read_average(uint8_t times)
 {
   if (times < 1) times = 1;
   float sum = 0;
@@ -175,7 +179,7 @@ float HX711::read_average(uint8_t times)
 }
 
 
-float HX711::read_median(uint8_t times)
+float HX71708::read_median(uint8_t times)
 {
   if (times > 15) times = 15;
   if (times < 3)  times = 3;
@@ -191,7 +195,7 @@ float HX711::read_median(uint8_t times)
 }
 
 
-float HX711::read_medavg(uint8_t times)
+float HX71708::read_medavg(uint8_t times)
 {
   if (times > 15) times = 15;
   if (times < 3)  times = 3;
@@ -216,7 +220,7 @@ float HX711::read_medavg(uint8_t times)
 }
 
 
-float HX711::read_runavg(uint8_t times, float alpha)
+float HX71708::read_runavg(uint8_t times, float alpha)
 {
   if (times < 1)  times = 1;
   if (alpha < 0)  alpha = 0;
@@ -235,61 +239,61 @@ float HX711::read_runavg(uint8_t times, float alpha)
 //
 //  MODE
 //
-void HX711::set_raw_mode()
+void HX71708::set_raw_mode()
 {
-  _mode = HX711_RAW_MODE;
+  _mode = HX71708_RAW_MODE;
 }
 
 
-void HX711::set_average_mode()
+void HX71708::set_average_mode()
 {
-  _mode = HX711_AVERAGE_MODE;
+  _mode = HX71708_AVERAGE_MODE;
 }
 
 
-void HX711::set_median_mode()
+void HX71708::set_median_mode()
 {
-  _mode = HX711_MEDIAN_MODE;
+  _mode = HX71708_MEDIAN_MODE;
 }
 
 
-void HX711::set_medavg_mode()
+void HX71708::set_medavg_mode()
 {
-  _mode = HX711_MEDAVG_MODE;
+  _mode = HX71708_MEDAVG_MODE;
 }
 
 
 //  set_run_avg will use a default alpha of 0.5.
-void HX711::set_runavg_mode()
+void HX71708::set_runavg_mode()
 {
-  _mode = HX711_RUNAVG_MODE;
+  _mode = HX71708_RUNAVG_MODE;
 }
 
 
-uint8_t HX711::get_mode()
+uint8_t HX71708::get_mode()
 {
   return _mode;
 }
 
 
-float HX711::get_value(uint8_t times)
+float HX71708::get_value(uint8_t times)
 {
   float raw;
   switch(_mode)
   {
-    case HX711_RAW_MODE:
+    case HX71708_RAW_MODE:
       raw = read();
       break;
-    case HX711_RUNAVG_MODE:
+    case HX71708_RUNAVG_MODE:
       raw = read_runavg(times);
       break;
-    case HX711_MEDAVG_MODE:
+    case HX71708_MEDAVG_MODE:
       raw = read_medavg(times);
       break;
-    case HX711_MEDIAN_MODE:
+    case HX71708_MEDIAN_MODE:
       raw = read_median(times);
       break;
-    case HX711_AVERAGE_MODE:
+    case HX71708_AVERAGE_MODE:
     default:
       raw = read_average(times);
       break;
@@ -298,7 +302,7 @@ float HX711::get_value(uint8_t times)
 };
 
 
-float HX711::get_units(uint8_t times)
+float HX71708::get_units(uint8_t times)
 {
   float units = get_value(times) * _scale;
   return units;
@@ -309,19 +313,19 @@ float HX711::get_units(uint8_t times)
 //
 //  TARE
 //
-void HX711::tare(uint8_t times)
+void HX71708::tare(uint8_t times)
 {
   _offset = read_average(times);
 }
 
 
-float HX711::get_tare()
+float HX71708::get_tare()
 {
   return -_offset * _scale;
 }
 
 
-bool HX711::tare_set()
+bool HX71708::tare_set()
 {
   return _offset != 0;
 }
@@ -329,31 +333,28 @@ bool HX711::tare_set()
 
 ///////////////////////////////////////////////////////////////
 //
-//  GAIN
-//
-//  note: if parameter gain == 0xFF40 some compilers
-//  will map that to 0x40 == HX711_CHANNEL_A_GAIN_64;
-//  solution: use uint32_t or larger parameters everywhere.
-//  note that changing gain/channel may take up to 400 ms (page 3)
-bool HX711::set_gain(uint8_t gain, bool forced)
+
+
+bool HX71708::set_data_rate(uint8_t data_rate, bool forced)
 {
-  if ( (not forced) && (_gain == gain)) return true;
-  switch(gain)
+  if ( (not forced) && (_data_rate == data_rate)) return true;
+  switch(data_rate)
   {
-    case HX711_CHANNEL_B_GAIN_32:
-    case HX711_CHANNEL_A_GAIN_64:
-    case HX711_CHANNEL_A_GAIN_128:
-      _gain = gain;
-      read();     //  next user read() is from right channel / gain
+    case HX71708_DATA_RATE_10:
+    case HX71708_DATA_RATE_20:
+    case HX71708_DATA_RATE_80:
+    case HX71708_DATA_RATE_320:
+      _data_rate = data_rate;
+      read();     //  next user read()
       return true;
   }
   return false;   //  unchanged, but incorrect value.
 }
 
 
-uint8_t HX711::get_gain()
+uint8_t HX71708::get_data_rate()
 {
-  return _gain;
+  return _data_rate;
 }
 
 
@@ -361,7 +362,7 @@ uint8_t HX711::get_gain()
 //
 //  CALIBRATION
 //
-bool HX711::set_scale(float scale)
+bool HX71708::set_scale(float scale)
 {
   if (scale == 0) return false;
   _scale = 1.0 / scale;
@@ -369,26 +370,26 @@ bool HX711::set_scale(float scale)
 }
 
 
-float HX711::get_scale()
+float HX71708::get_scale()
 {
   return 1.0 / _scale;
 }
 
 
-void HX711::set_offset(int32_t offset)
+void HX71708::set_offset(int32_t offset)
 {
   _offset = offset;
 }
 
 
-int32_t HX711::get_offset()
+int32_t HX71708::get_offset()
 {
   return _offset;
 }
 
 
 //  assumes tare() has been set.
-void HX711::calibrate_scale(uint16_t weight, uint8_t times)
+void HX71708::calibrate_scale(uint16_t weight, uint8_t times)
 {
   _scale = (1.0 * weight) / (read_average(times) - _offset);
 }
@@ -398,7 +399,7 @@ void HX711::calibrate_scale(uint16_t weight, uint8_t times)
 //
 //  POWER MANAGEMENT
 //
-void HX711::power_down()
+void HX71708::power_down()
 {
   //  at least 60 us HIGH
   digitalWrite(_clockPin, HIGH);
@@ -406,7 +407,7 @@ void HX711::power_down()
 }
 
 
-void HX711::power_up()
+void HX71708::power_up()
 {
   digitalWrite(_clockPin, LOW);
 }
@@ -416,13 +417,13 @@ void HX711::power_up()
 //
 //  MISC
 //
-uint32_t HX711::last_time_read()
+uint32_t HX71708::last_time_read()
 {
   return _lastTimeRead;
 }
 
 //  obsolete future
-uint32_t HX711::last_read()
+uint32_t HX71708::last_read()
 {
   return _lastTimeRead;
 }
@@ -433,7 +434,7 @@ uint32_t HX711::last_read()
 //  PRIVATE
 //
 
-void HX711::_insertSort(float * array, uint8_t size)
+void HX71708::_insertSort(float * array, uint8_t size)
 {
   uint8_t t, z;
   float temp;
@@ -454,7 +455,7 @@ void HX711::_insertSort(float * array, uint8_t size)
 
 //  MSB_FIRST optimized shiftIn
 //  see datasheet page 5 for timing
-uint8_t HX711::_shiftIn()
+uint8_t HX71708::_shiftIn()
 {
   //  local variables are faster.
   uint8_t clk   = _clockPin;
