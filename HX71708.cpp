@@ -137,11 +137,7 @@ float HX71708::read()
   //
    
   //
-  uint8_t m = 4;
-  if      (_data_rate == HX71708_DATA_RATE_10) m = 1;
-  else if  (_data_rate == HX71708_DATA_RATE_20) m = 2;
-  else if  (_data_rate == HX71708_DATA_RATE_80) m = 3;
-  else if  (_data_rate == HX71708_DATA_RATE_320) m = 4;
+  uint8_t m = _data_rate;
 
   while (m > 0)
   {
