@@ -1,24 +1,35 @@
 #pragma once
 //
 //    FILE: HX71708.h
+
+// HX71708 library
+//  AUTHOR: Ben Iseman
+// VERSION: 0.1.0
+// PURPOSE: Library for load cells for Arduino
+//     URL: https://github.com/beniseman/HX71708
+
+// Adapted from the HX711 library by Rob Tillaart
 //  AUTHOR: Rob Tillaart
 // VERSION: 0.5.2
 // PURPOSE: Library for load cells for Arduino
 //     URL: https://github.com/RobTillaart/HX711_MP
 //     URL: https://github.com/RobTillaart/HX711
+
+// Licensed under the MIT License
+
+
 //
 //  NOTES
-//  Superset of interface of HX711 class of Bogde
+//  Superset of interface of HX71708 class of Bogde
 //  uses float instead of long as float has 23 bits mantissa
 //  which almost perfectly matches the 24 bit ADC.
 
 
-// forked by Ben Iseman
-// HX711 uses clock pulses to set gain, HX71708 uses them to set data rate
+
 
 #include "Arduino.h"
 
-#define HX71708_LIB_VERSION               (F("0.5.2"))
+#define HX71708_LIB_VERSION               (F("0.1.0"))
 
 
 const uint8_t HX71708_AVERAGE_MODE = 0x00;

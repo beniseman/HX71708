@@ -1,13 +1,28 @@
 //
 //    FILE: HX71708.cpp
+
+// HX71708 library
+//  AUTHOR: Ben Iseman
+// VERSION: 0.1.0
+// PURPOSE: Library for load cells for Arduino
+//     URL: https://github.com/beniseman/HX71708
+
+// Adapted from the HX711 library by Rob Tillaart
 //  AUTHOR: Rob Tillaart
 // VERSION: 0.5.2
-// PURPOSE: Library for load cells for UNO
+// PURPOSE: Library for load cells for Arduino
 //     URL: https://github.com/RobTillaart/HX711_MP
 //     URL: https://github.com/RobTillaart/HX711
 
-// forked by Ben Iseman
-// support for HX71708
+// Licensed under the MIT License
+
+
+//
+//  NOTES
+//  Superset of interface of HX71708 class of Bogde
+//  uses float instead of long as float has 23 bits mantissa
+//  which almost perfectly matches the 24 bit ADC.
+
 
 
 #include "HX71708.h"
