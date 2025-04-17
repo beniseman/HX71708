@@ -1,3 +1,10 @@
+[![Arduino Library](https://img.shields.io/badge/Arduino-Library-00979D?logo=arduino&logoColor=white&style=flat)](https://www.ardu-badge.com/HX71708)
+[![Arduino Library Manager](https://www.ardu-badge.com/badge/HX71708.svg)](https://www.ardu-badge.com/HX71708)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/beniseman/library/HX71708.svg)](https://registry.platformio.org/libraries/beniseman/HX71708)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/beniseman/HX71708)](https://github.com/beniseman/HX71708/releases)
+[![GitHub issues](https://img.shields.io/github/issues/beniseman/HX71708)](https://github.com/beniseman/HX71708/issues)
+
 # HX71708 v0.1.0 (alpha)
 
 ## Overview
